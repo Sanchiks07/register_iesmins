@@ -6,7 +6,7 @@ function validateForm() {
 
     let namePattern = /^[A-Za-zĀ-ž\s]+$/;
     let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*-_]).{9,}$/;
+    let passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*-_.]).{9,}$/;
 
     if (!namePattern.test(fname) || !namePattern.test(lname)) {
         alert("First name and Last name should contain only letters!");
