@@ -1,54 +1,57 @@
 <?php
+session_start();
+
 $dsn = "mysql:host=localhost;dbname=register;charset=utf8mb4";
-$username = "root";  
-$password = "root";  
+$username = "root";
+$password = "root";
 
 try {
     $pdo = new PDO($dsn, $username, $password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, 
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
 
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
+        $errors = [];
         $first_name = trim($_POST['first_name'] ?? '');
         $last_name = trim($_POST['last_name'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
-        // $hash_password = password_hash($password, PASSWORD_DEFAULT);
 
-        if (empty($first_name) || empty($last_name) || empty($email) || empty($password)) {
-            echo "<script>alert('All fields are required!'); window.location.href='index.php';</script>";
-            exit();
+        if (empty($first_name)) {
+            $errors['first_name'] = "First name is required!";
+        } elseif (!preg_match("/^[A-Za-zĀ-ž\s]+$/", $first_name)) {
+            $errors['first_name'] = "First name should contain only letters!";
         }
 
-        // validation
-        function validateForm($first_name, $last_name, $email, $password) {
-    
-        if (!preg_match("/^[A-Za-zĀ-ž\s]+$/", $first_name) || !preg_match("/^[A-Za-zĀ-ž\s]+$/", $last_name)) {
-            return "First name and Last name should contain only letters!";
+        if (empty($last_name)) {
+            $errors['last_name'] = "Last name is required!";
+        } elseif (!preg_match("/^[A-Za-zĀ-ž\s]+$/", $last_name)) {
+            $errors['last_name'] = "Last name should contain only letters!";
         }
 
-        if (!preg_match("/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/", $email)) {
-            return "Invalid email address!";
+        if (empty($email)) {
+            $errors['email'] = "Email is required!";
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = "Invalid email format!";
+        } else {
+            $checkEmail = $pdo->prepare("SELECT email FROM users WHERE email = :email");
+            $checkEmail->execute([':email' => $email]);
+            if ($checkEmail->fetch()) {
+                $errors['email'] = "This email is already registered!";
+            }
         }
 
-        if (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*-_]).{9,}$/", $password)) {
-            return "Password must be at least 9 characters long, contain an uppercase and a lowercase letter, a number, and a special symbol!";
-        }
-    
-        return true;
-        }
-
-        $validationResult = validateForm($first_name, $last_name, $email, $password);
-        if ($validationResult !== true) {
-            echo "<script>alert('$validationResult'); window.location.href='index.php';</script>";
-            exit();
+        if (empty($password)) {
+            $errors['password'] = "Password is required!";
+        } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*-_]).{9,}$/", $password)) {
+            $errors['password'] = "Password must be at least 9 characters, contain uppercase & lowercase letters, a number, and a special character!";
         }
 
-        $checkEmail = $pdo->prepare("SELECT email FROM users WHERE email = :email");
-        $checkEmail->execute([':email' => $email]);
-        if ($checkEmail->fetch()) {
-            echo "<script>alert('This email is already registered!'); window.location.href='index.php';</script>";
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['form_data'] = $_POST; // Store input values to repopulate form
+            header("Location: index.php");
             exit();
         }
 
@@ -58,13 +61,16 @@ try {
             ':first_name' => $first_name,
             ':last_name' => $last_name,
             ':email' => $email,
-            ':password' => password_hash($password, PASSWORD_DEFAULT) // $hash_passwordb
+            ':password' => password_hash($password, PASSWORD_DEFAULT)
         ]);
 
-        echo "<script>alert('Registration Successful!'); window.location.href='index.php';</script>";
+        $_SESSION['success'] = "Registration Successful!";
+        header("Location: index.php");
+        exit();
     }
-
 } catch (PDOException $e) {
-    echo "<script>alert('Database Error: " . $e->getMessage() . "'); window.location.href='index.php';</script>";
+    $_SESSION['error'] = "Database Error: " . $e->getMessage();
+    header("Location: index.php");
+    exit();
 }
 ?>

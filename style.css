@@ -110,3 +110,48 @@ h2 {
     opacity: 1;
 }
 
+/* Submit button */
+.btn {
+    width: 50%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #fff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    backdrop-filter: blur(5px);
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* PHP alerts */
+.php_error {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+    padding: 5px;
+    text-align: center;
+}
+
+/* Registration succesfull */
+.alert.success {
+    background-color: #ccffcc;
+    color: green;
+    border: 1px solid green;
+    padding: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
